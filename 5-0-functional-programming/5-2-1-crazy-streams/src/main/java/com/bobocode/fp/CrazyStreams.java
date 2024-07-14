@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+
 /**
  * {@link CrazyStreams} is an exercise class. Each method represent some operation with a collection of accounts that
  * should be implemented using Stream API. Every method that is not implemented yet throws
@@ -206,10 +210,17 @@ public class CrazyStreams {
     public Map<Character, Long> getCharacterFrequencyIgnoreCaseInFirstAndLastNames(int nameLengthBound) {
          return accounts.stream()
                  .flatMap(a-> Stream.of(a.getFirstName(), a.getLastName()))
+                 .filter(name -> name.length() >= nameLengthBound)
                  .map(String::toLowerCase)
                  .flatMapToInt(String::chars)
                  .mapToObj(c -> (char) c)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+                .collect(groupingBy(identity(), Collectors.counting()));
+
+//        return accounts.stream()
+//                .filter(a -> (a.getFirstName().length() + a.getLastName().length()) >= nameLengthBound)
+//                .flatMap(a -> (a.getFirstName() + a.getLastName()).toLowerCase().chars().mapToObj(c -> (char) c))
+//                .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+
     }
 
 }
