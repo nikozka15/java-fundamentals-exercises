@@ -10,12 +10,14 @@ import com.bobocode.util.ExerciseNotCompletedException;
  */
 public class FlightServiceFactory {
 
+
     /**
      * Create a new instance of {@link FlightService}
      *
      * @return FlightService
      */
     public FlightService creteFlightService() {
-        throw new ExerciseNotCompletedException();
+
+        return new FlightService();
     }
 }
