@@ -1,96 +1,63 @@
 package com.bobocode;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.math3.util.Pair;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.stream.IntStream;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
+import java.util.function.Supplier;
 
-
-@Slf4j
 public class DemoApp {
-    private static final String API_URL = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=10&api_key=DEMO_KEY";
+    public static void main(String[] args) {
+// Function
+        List<Integer> numbers = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        List<Integer> result1 = convert(numbers, number -> number * 2);
+        System.out.println(result1);
+// IntBinaryOperator
+        System.out.println(convert(1, 1, Integer::sum));
+// Consumer
+        print("Consumer", System.out::println);
 
-    public static void main(String[] args) throws IOException {
-        String jsonResponse = fetchDataFromAPI(API_URL);
-        log.info(jsonResponse);
-        List<String> urls = parseImageUrls(jsonResponse);
+// Supplier
+        System.out.println(getObject(() -> "Supplier"));
+// BiFunction
+        BiFunction<String, String, String> stringConcatenator = (str1, str2) -> str1 + str2;
+        System.out.println(convert("first", "second", stringConcatenator));
 
-        Pair<Long, String> largeSizeAndUrl = findLargestImage(urls);
-        log.info(largeSizeAndUrl.getFirst() + " " + largeSizeAndUrl.getSecond());
+        // quize
+        // Object o = () -> {System.out.println("Tricky example"); }; // will not compile
+        Runnable trickyExample = () -> {
+            System.out.println("Tricky example");
+        };
+
+        
+
     }
+// Function
+    public static <T, R> List<R> convert(List<T> list, Function<T, R> function){
 
-    private static String fetchDataFromAPI(String apiUrl) throws IOException {
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-
-        InputStream responseStream = connection.getInputStream();
-        try (Scanner scanner = new Scanner(responseStream, StandardCharsets.UTF_8)) {
-            return scanner.useDelimiter("\\A").next();
+        List<R> result = new ArrayList<>();
+        for (T t : list) {
+            result.add(function.apply(t));
         }
+        return result;
     }
 
-    private static List<String> parseImageUrls(String jsonResponse) {
-        JSONObject jsonObject = new JSONObject(jsonResponse);
-        JSONArray photosArray = jsonObject.getJSONArray("photos");
-
-        return IntStream.range(0, photosArray.length())
-                .mapToObj(photosArray::getJSONObject)
-                .map(photoObj -> photoObj.getString("img_src"))
-                .toList();
+    // IntBinaryOperator
+    public static int convert(int number, int number2, IntBinaryOperator function){
+        return function.applyAsInt(number, number2);
     }
-
-    private static Pair<Long, String> findLargestImage(List<String> imageUrls) throws IOException {
-        String largestImageUrl = null;
-        long largestSize = 0;
-
-        for (String imageUrl : imageUrls) {
-            long imageSize = getImageSize(imageUrl);
-            log.info("Image link {} size: {}", imageUrl, imageSize);
-            if (imageSize > largestSize) {
-                largestSize = imageSize;
-                largestImageUrl = imageUrl;
-            }
-        }
-
-        return new Pair<>(largestSize, largestImageUrl);
+    // Consumer
+    public static <T> void print(T string, Consumer<T> consumer) {
+        consumer.accept(string);
     }
-
-    private static long getImageSize(String imageUrl) throws IOException {
-        HttpURLConnection connection = null;
-
-        try {
-            URL url = new URL(imageUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setInstanceFollowRedirects(true);
-            connection.setRequestMethod("HEAD");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM) {
-                if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM) {
-                    String newUrl = connection.getHeaderField("Location");
-                    if (newUrl != null) {
-                        connection.disconnect();
-                        return getImageSize(newUrl);
-                    }
-                }
-                return connection.getContentLengthLong();
-            } else {
-                throw new IOException("Error fetching image size, response code: " + responseCode);
-            }
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+    // Supplier
+    public static <T> T getObject(Supplier<T> supplier) {
+        return supplier.get();
+    }
+    // BiFunction
+    public static <T, U, R> R convert(T t, U u, BiFunction<T, U, R> function) {
+        return function.apply(t, u);
     }
 }

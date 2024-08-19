@@ -1,5 +1,6 @@
 package com.bobocode.oop.data;
 
+import com.bobocode.oop.service.Flights;
 import com.bobocode.util.ExerciseNotCompletedException;
 
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import java.util.Set;
  * todo: 1. Implement a method {@link FlightDao#register(String)} that store new flight number into the set
  * todo: 2. Implement a method {@link FlightDao#findAll()} that returns a set of all flight numbers
  */
-public class FlightDao {
+public class FlightDao implements Flights {
     private Set<String> flights = new HashSet<>();
 
     /**
