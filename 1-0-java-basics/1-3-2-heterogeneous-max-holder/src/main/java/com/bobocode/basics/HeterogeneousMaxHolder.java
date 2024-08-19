@@ -1,6 +1,10 @@
 package com.bobocode.basics;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Comparator.naturalOrder;
 
 /**
  * {@link HeterogeneousMaxHolder} is a multi-type container that holds maximum values per each type. It's kind of a
@@ -14,8 +18,8 @@ import java.util.Map;
  *
  * @author Taras Boychuk
  */
-public class HeterogeneousMaxHolder {
-
+public class   HeterogeneousMaxHolder {
+    private static Map<Class<?>, Object> maxValueMap = new HashMap<>();
     /**
      * A method put stores a provided value by its type, if the value is greater than the current maximum. In other words, the logic
      * of this method makes sure that only max value is stored and everything else is ignored.
@@ -31,6 +35,9 @@ public class HeterogeneousMaxHolder {
      * @return a smaller value among the provided value and the current maximum
      */
     // todo: implement a method according to javadoc
+    public static <T extends Comparable<? super T>> T put(Class<T> key, T value) {
+       return put(key, value, naturalOrder());
+    }
 
     /**
      * An overloaded method put implements the same logic using a custom comparator. A given comparator is wrapped with
@@ -45,7 +52,14 @@ public class HeterogeneousMaxHolder {
      * @return a smaller value among the provided value and the current maximum
      */
     // todo: implement a method according to javadoc
-
+    public static <T> T put(Class<T> key, T value, Comparator<? super T> comparator) {
+        comparator = Comparator.nullsFirst(comparator);
+        T currentMax = key.cast( maxValueMap.get(key));
+        if (comparator.compare(value, currentMax) > 0) {
+            return  key.cast( maxValueMap.put(key, value))  ;
+        }
+        return value;
+    }
     /**
      * A method getMax returns a max value by the given type. If no value is stored by this type, then it returns null.
      *
@@ -54,4 +68,8 @@ public class HeterogeneousMaxHolder {
      * @return current max value or null
      */
     // todo: implement a method according to javadoc
+
+    public static <T> T getMax(Class<T> key) {
+        return key.cast( maxValueMap.get(key));
+    }
 }

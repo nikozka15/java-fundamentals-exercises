@@ -1,5 +1,6 @@
 package com.bobocode.oop.factory;
 
+import com.bobocode.oop.data.FlightDao;
 import com.bobocode.oop.service.FlightService;
 import com.bobocode.util.ExerciseNotCompletedException;
 
@@ -10,12 +11,14 @@ import com.bobocode.util.ExerciseNotCompletedException;
  */
 public class FlightServiceFactory {
 
+
     /**
      * Create a new instance of {@link FlightService}
      *
      * @return FlightService
      */
     public FlightService creteFlightService() {
-        throw new ExerciseNotCompletedException();
+
+        return new FlightService(new FlightDao());
     }
 }
